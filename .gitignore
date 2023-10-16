@@ -1,5 +1,6 @@
 .env
 node_modules/
 results.html
+result.html
 create_user_results.html
 submit_challenges_results.html
