@@ -1,3 +1,8 @@
+/**
+ * Create a user account and submit a challenge over and over again.
+ * Uses constant-arrival-rate executor by default.
+ * https://k6.io/docs/using-k6/scenarios/executors/constant-arrival-rate/
+ */
 import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
 import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.1/index.js";
 import http from "k6/http";
@@ -8,6 +13,7 @@ const REQUESTS_PER_VU = 10;
 const CHALLENGE_ID = 225;
 const WRONG_ANSWER = "b";
 const CORRECT_ANSWER = "a";
+const ANSWER_TO_SUBMIT = CORRECT_ANSWER; // or WRONG_ANSWER
 
 function generateRandomString(length) {
   var result = "";
@@ -80,7 +86,7 @@ export default function (sessionInfo) {
     `${domain}/api/v1/challenges/attempt`,
     JSON.stringify({
       challenge_id: CHALLENGE_ID,
-      submission: CORRECT_ANSWER,
+      submission: ANSWER_TO_SUBMIT,
     }),
     {
       headers: {
