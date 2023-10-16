@@ -28,5 +28,5 @@ yarn install
 
 ```bash
 k6 run -e CTFD_URL=https://example.com create_user.js
-k6 run -e CTFD_URL=https://ctfd.zack.fyi submit_challenge.js
+k6 run -e CTFD_URL=https://example.com submit_challenge.js
 ```
