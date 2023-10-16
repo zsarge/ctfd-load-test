@@ -18,12 +18,6 @@ sudo dnf install https://dl.k6.io/rpm/repo.rpm
 sudo dnf install k6
 ```
 
-install dependencies
-
-```bash
-yarn install
-```
-
 ## Run Tests
 
 ```bash
