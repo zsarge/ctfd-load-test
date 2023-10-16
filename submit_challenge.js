@@ -28,7 +28,21 @@ const user = {
 
 export const options = {
   vus: VU_COUNT, // all VUs will share the same user account
-  iterations: VU_COUNT * REQUESTS_PER_VU, // each user makes N requests
+  //   iterations: VU_COUNT * REQUESTS_PER_VU, // each user makes N requests
+  scenarios: {
+    contacts: {
+      executor: "constant-arrival-rate",
+      // How long the test lasts
+      duration: "1m",
+      // How many iterations per timeUnit
+      rate: 20,
+      // Start `rate` iterations per second
+      timeUnit: "1s",
+      // Pre-allocate VUs
+      preAllocatedVUs: 50,
+      maxVUs: 200,
+    },
+  },
 };
 
 // set with `k6 run -e CTFD_URL=https://example.com submit_challenges.js `
@@ -90,7 +104,6 @@ export default function (sessionInfo) {
       }
     },
   });
-  sleep(1);
 }
 
 // from https://github.com/benc-uk/k6-reporter#multiple-outputs
