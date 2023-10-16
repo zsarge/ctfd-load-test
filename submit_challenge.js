@@ -2,11 +2,9 @@ import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporte
 import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.1/index.js";
 import http from "k6/http";
 import { sleep, check } from "k6";
-import exec from "k6/execution";
-import { parseHTML } from "k6/html";
 
-const VU_COUNT = 1;
-const REQUESTS_PER_VU = 1;
+const VU_COUNT = 10;
+const REQUESTS_PER_VU = 10;
 const CHALLENGE_ID = 225;
 const WRONG_ANSWER = "b";
 const CORRECT_ANSWER = "a";
@@ -56,11 +54,10 @@ export function setup() {
     "accounts created successfully": (r) => r.status === 200,
   });
   const sessionCookie = res.request.cookies.session[0].value;
+  // WARNING: parsing HTML with regex is not a good idea...
+  // but the text we want is in the JavaScript which isn't accessible via CSS selectors
   const csrfNonceRegex = /'csrfNonce': "(.{64})"/;
   const csrfNonce = res.body.match(csrfNonceRegex)[1]; // select first group in match
-  console.log({ sessionCookie, csrfNonce });
-
-  sleep(1);
   return { sessionCookie, csrfNonce };
 }
 
@@ -69,7 +66,7 @@ export default function (sessionInfo) {
     `${domain}/api/v1/challenges/attempt`,
     JSON.stringify({
       challenge_id: CHALLENGE_ID,
-      submission: WRONG_ANSWER,
+      submission: CORRECT_ANSWER,
     }),
     {
       headers: {
@@ -84,8 +81,16 @@ export default function (sessionInfo) {
   check(postResponse, {
     "api returned 200": (r) => r.status === 200,
     "submission was successfully processed": (r) => r.json().success === true,
-    "submission was incorrect": (r) => r.json().data.status === "incorrect",
+    "submission was expected": (r) => {
+      if (JSON.parse(r.request.body).submission === CORRECT_ANSWER) {
+        const status = r.json().data.status;
+        return status === "correct" || status === "already_solved";
+      } else {
+        return r.json().data.status === "incorrect";
+      }
+    },
   });
+  sleep(1);
 }
 
 // from https://github.com/benc-uk/k6-reporter#multiple-outputs
